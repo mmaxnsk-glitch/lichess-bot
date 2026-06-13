@@ -1,17 +1,9 @@
-token: "lip_kXYzbLDm4NmuFWeV3mbQ"    # Lichess OAuth2 Token.
+token: ""    # Lichess OAuth2 Token.
 url: "https://lichess.org/"        # Lichess base URL.
 
 engine: # Engine settings.
-  #C:/Users/Max/PycharmProjects/pythonProject4/engines_chess/all_stockfish/stockfish_dev/stockfish
-  #C:/Users/Max/PycharmProjects/pythonProject4/engines_chess/fairy_stockfish
-  #C:/Users/Max/PycharmProjects/pythonProject4/engines_chess/leela
-  #C:/Users/Max/PycharmProjects/pythonProject4/engines_chess/dragon/dragon_05e2a7/Windows
-  #stockfish-windows-x86-64-avx2.exe
-  #fairy-stockfish-largeboard_x86-64-modern.exe
-  #lc0.exe
-  #dragon-64bit-avx2.exe
-  dir: "C:/Users/Max/PycharmProjects/pythonProject4/engines_chess/all_stockfish/stockfish_dev/stockfish"                # Directory containing the engine. This can be an absolute path or one relative to lichess-bot/.
-  name: "stockfish-windows-x86-64-avx2.exe"              # Binary name of the engine to use.
+  dir: ""                # Directory containing the engine. This can be an absolute path or one relative to lichess-bot/.
+  name: ""              # Binary name of the engine to use.
 # interpreter: "java"
 # interpreter_options:
 #   - "-jar"
@@ -21,7 +13,7 @@ engine: # Engine settings.
   ponder: true                     # Think on opponent's time.
 
   polyglot:
-    enabled: true                 # Activate polyglot book.
+    enabled: false                 # Activate polyglot book.
     book:
       standard: # List of book file paths for variant standard.
         - engines/Juggernaut.bin
@@ -106,8 +98,8 @@ engine: # Engine settings.
 
   uci_options:                     # Arbitrary UCI options passed to the engine.
     Move Overhead: 100             # Increase if your bot flags games too often.
-    Threads: 4                     # Max CPU threads the engine can use.
-    Hash: 512                      # Max memory (in megabytes) the engine can allocate.
+    Threads: 2                     # Max CPU threads the engine can use.
+    Hash: 128                      # Max memory (in megabytes) the engine can allocate.
     SyzygyPath: "./syzygy/"        # Paths to Syzygy endgame tablebases that the engine reads.
     UCI_ShowWDL: true              # Show the chance of the engine winning.
 #   go_commands:                   # Additional options to pass to the UCI go command.
@@ -181,7 +173,7 @@ challenge:                         # Incoming challenges.
 # online_block_list:               # The urls from which to retrieve a list of bot names that will not be challenged. The list should be a text file where each line contains the name of a blocked bot
 #   - example.com/blocklist
   #allow_list:                      # List of users from which challenges are exclusively accepted, all others being declined. If empty, challenges from all users may be accepted.
-  recent_bot_challenge_age: 60     # Maximum age of a bot challenge to be considered recent in seconds
+  recent_bot_challenge_age: 120     # Maximum age of a bot challenge to be considered recent in seconds
   max_recent_bot_challenges: 1     # Maximum number of recent challenges that can be accepted from the same bot
   bullet_requires_increment: true # Require that bullet game challenges from bots have a non-zero increment
   max_simultaneous_games_per_user: 1  # Maximum number of simultaneous games with the same user
