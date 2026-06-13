@@ -1,13 +1,15 @@
 """Allows lichess-bot to send messages to the chat."""
 import logging
+import chess
+from random import randint
+import random
 from lib import model
 from lib.engine_wrapper import EngineWrapper
 from lib.lichess import Lichess
 from lib.lichess_types import GameEventType
 from collections.abc import Sequence
 from lib.timer import seconds
-from typing import TypeAlias
-MULTIPROCESSING_LIST_TYPE: TypeAlias = Sequence[model.Challenge]
+MULTIPROCESSING_LIST_TYPE = Sequence[model.Challenge]
 
 logger = logging.getLogger(__name__)
 
@@ -71,7 +73,7 @@ class Conversation:
         if cmd in ("commands", "help"):
             self.send_reply(line,
                             "Supported commands: !wait (wait a minute for my first move), !name, "
-                            "!eval (or any text starting with !eval), !queue")
+                            "!eval, !queue, !engine, !CPU, !info, !info2 (you will find many interesting features)")
         elif cmd == "wait" and self.game.is_abortable():
             self.game.ping(seconds(60), seconds(120), seconds(120))
             self.send_reply(line, "Waiting 60 seconds...")
@@ -89,6 +91,137 @@ class Conversation:
                 self.send_reply(line, f"Challenge queue: {challengers}")
             else:
                 self.send_reply(line, "No challenges queued.")
+        elif cmd == "engine":
+            self.send_reply(line, "This engine is a symbiosis of Stockfish and Leela, as well as a bit of Dragon.")
+        elif cmd == "CPU":
+            self.send_reply(line, "something between linux and windows")
+        elif cmd == "info":
+            self.send_reply(line, "My creator @hihihihahahaha My club  lichess.org /team /zipfile_chess_bot."
+                                  " PLZ join my club!!!")
+        elif cmd == "info1":
+            self.send_reply(line, "I can answer the question (!question?), !calc")
+        elif "?" in cmd:
+            otvet = ["Yes", "No", "Don't know"]
+            x = randint(0, 2)
+            self.send_reply(line, f"{otvet[x]}")
+        elif "calc" in cmd:
+            try:
+                # Get the entire string after !calc
+                expression_str = line.text[5:].strip()  # remove "!calc"
+
+                # Split the expression into parts
+                parts = expression_str.split()
+
+                # Check that we have 3 parts: x operator y
+                if len(parts) != 3:
+                    self.send_reply(line, "Usage: !calc number operator number Example: !calc 6 + 7")
+                    return
+
+                x_str, operator, y_str = parts
+
+                # Convert strings to numbers (support complex numbers)
+                try:
+                    # Try to convert to complex numbers
+                    x = complex(x_str.replace('i', 'j').replace(',', '.'))
+                    y = complex(y_str.replace('i', 'j').replace(',', '.'))
+                except ValueError:
+                    # If that fails, try as real numbers
+                    try:
+                        x = float(x_str.replace(',', '.'))
+                        y = float(y_str.replace(',', '.'))
+                    except ValueError:
+                        self.send_reply(line, "Error: invalid number format")
+                        return
+
+                # Perform the operation based on the operator
+                result = None
+                if operator == '+':
+                    result = x + y
+                elif operator == '-':
+                    result = x - y
+                elif operator == '*':
+                    result = x * y
+                elif operator == '/':
+                    if y == 0:
+                        self.send_reply(line, "Error: division by zero")
+                        return
+                    result = x / y
+                elif operator == '**' or operator == '^':
+                    result = x ** y
+                elif operator == '%':
+                    if isinstance(x, complex) or isinstance(y, complex):
+                        self.send_reply(line, "Error: % operation not supported for complex numbers")
+                        return
+                    result = x % y
+                elif operator == '//':
+                    if isinstance(x, complex) or isinstance(y, complex):
+                        self.send_reply(line, "Error: integer division not supported for complex numbers")
+                        return
+                    result = x // y
+                else:
+                    self.send_reply(line, f"Unknown operator: {operator} Available: + - * / ** ^ % //")
+                    return
+
+                # Format the result
+                if isinstance(result, complex):
+                    # Format complex numbers nicely
+                    real = result.real
+                    imag = result.imag
+                    if real == 0 and imag == 0:
+                        response = "0"
+                    elif real == 0:
+                        response = f"{imag}i"
+                    elif imag == 0:
+                        response = f"{real}"
+                    else:
+                        sign = '+' if imag > 0 else ''
+                        response = f"{real}{sign}{imag}i"
+                else:
+                    # For real numbers
+                    response = str(result)
+
+                self.send_reply(line, f"{x} {operator} {y} = {response}")
+
+            except Exception as e:
+                self.send_reply(line, f"Error: {str(e)}")
+
+
+        elif cmd.startswith("skill") and line.room == "player":
+            parts = cmd.split()
+            if len(parts) == 2:
+                try:
+                    level = int(parts[1])
+                    if 0 <= level <= 20:
+                        self.engine.set_skill_level(level)
+                        self.send_reply(line, f"Skill level set to {level}")
+                    else:
+                        self.send_reply(line, "Skill level must be 0-20")
+                except ValueError:
+                    self.send_reply(line, "Usage: !skill <0-20>")
+
+        elif cmd.startswith("hint"):
+            # Check if it's a rated game
+            if self.game.rated:
+                self.send_reply(line,
+                                "Hints only in casual games. You wouldn't want to be suspected of cheating, "
+                                "would you? ;)")
+                return
+
+            try:
+                board = self.game.board
+                # Quick analysis (0.3 seconds is enough for a hint)
+                result = self.engine.analyse(board, chess.engine.Limit(time=0.3))
+
+                if "pv" in result and result["pv"]:
+                    move = result["pv"][0]
+                    san_move = board.san(move)
+                    self.send_reply(line, f"Hint: {san_move}")
+                else:
+                    self.send_reply(line, "No hint available")
+
+            except Exception as e:
+                self.send_reply(line, f"Error getting hint: {str(e)}")
+                logger.error(f"Hint error: {e}")
 
     def send_reply(self, line: ChatLine, reply: str) -> None:
         """
