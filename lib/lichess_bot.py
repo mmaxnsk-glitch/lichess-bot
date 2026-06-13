@@ -1182,6 +1182,7 @@ def log_python_and_libraries() -> None:
 
 
 def start_lichess_bot() -> None:
+    os.environ['LICHESS_BOT_ENABLE_SKILL_LEVEL'] = '1' #skill level total :)
     """Parse arguments passed to lichess-bot.py and starts lichess-bot."""
     parser = argparse.ArgumentParser(description="Play on Lichess with a bot")
     parser.add_argument("-u", action="store_true", help="Upgrade your account to a bot account.")
