@@ -2,8 +2,8 @@ token: ""    # Lichess OAuth2 Token.
 url: "https://lichess.org/"        # Lichess base URL.
 
 engine: # Engine settings.
-  dir: ""                # Directory containing the engine. This can be an absolute path or one relative to lichess-bot/.
-  name: ""              # Binary name of the engine to use.
+  dir: "./engines"                # Directory containing the engine. This can be an absolute path or one relative to lichess-bot/.
+  name: "stockfish"              # Binary name of the engine to use.
 # interpreter: "java"
 # interpreter_options:
 #   - "-jar"
@@ -135,7 +135,7 @@ correspondence:
   ponder: false                    # Ponder in correspondence games the bot is connected to.
 
 challenge:                         # Incoming challenges.
-  concurrency: 3                   # Number of games to play simultaneously.
+  concurrency: 20                   # Number of games to play simultaneously.
   sort_by: "best"                  # Possible values: "best" and "first".
   preference: "none"               # Possible values: "none", "human", "bot".
   accept_bot: true                 # Accepts challenges coming from other bots.
@@ -161,9 +161,9 @@ challenge:                         # Incoming challenges.
   time_controls:                   # Time controls to accept (bots are not allowed to play ultraBullet).
     - bullet
     - blitz
-#   - rapid
-#   - classical
-#   - correspondence
+    - rapid
+    - classical
+    - correspondence
   modes:                           # Game modes to accept.
     - casual                       # Unrated games.
     - rated                        # Rated games - must comment if the engine doesn't try to win.
@@ -189,7 +189,7 @@ greeting:
   hello_spectators: "Hi! I'm {me}. If anything, my creator is @hihihihahahaha_xray Type. !help" # Message to send to spectator chat at the start of a game
   goodbye_spectators: "Thanks for watching the game @{me} VS @{opponent}! Do you want to play with me?" # Message to send to spectator chat at the end of a game
 
-  #pgn_directory: "C:/Users/Max/PycharmProjects/pythonProject4/games"    # A directory where PGN-format records of the bot's games are kept
+  #pgn_directory: ""    # A directory where PGN-format records of the bot's games are kept
   #pgn_file_grouping: "opponent"        # How to group games into files. Options are "game", "opponent", and "all"
                                    # "game" (default) - every game is written to a different file named "{White name} vs. {Black name} - {lichess game ID}.pgn"
                                    # "opponent" - every game with a given opponent is written to a file named "{Bot name} games vs. {Opponent name}.pgn"
@@ -203,8 +203,8 @@ matchmaking:
   challenge_initial_time:          # Initial time in seconds of the challenge (to be chosen at random).
     - 60
     - 180
-#   - 480
-#   - 1500
+    - 480
+    - 1500
   challenge_increment:             # Increment in seconds of the challenge (to be chosen at random).
     - 3
 #  challenge_days:                 # Days for correspondence challenge (to be chosen at random).
