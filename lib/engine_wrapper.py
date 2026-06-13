@@ -497,7 +497,15 @@ class UCIEngine(EngineWrapper):
         self.engine = chess.engine.SimpleEngine.popen_uci(commands, timeout=60., debug=debug, setpgrp=True, stderr=stderr,
                                                           **popen_args)
         self.configure(options, game)
-
+    def set_skill_level(self, level: int) -> None:
+        """Устанавливает уровень навыка для Stockfish (0-20)."""
+        if 0 <= level <= 20:
+            try:
+                self.engine.configure({"Skill Level": level})
+                self.engine.configure({"UCI_LimitStrength": level < 20})
+                logger.info(f"Skill level set to {level}")
+            except Exception as e:
+                logger.error(f"Failed to set skill level: {e}")
 
 class XBoardEngine(EngineWrapper):
     """The class used to communicate with XBoard engines."""
